@@ -16,44 +16,27 @@ void updateInternal(double u[n+2][n+2], double v[n+2][n+2], double p[n+2][n+2], 
 }
 
 
-void updateBoundaries(double u[n+2][n+2], double v[n+2][n+2], double U_wall){
-    for(int j=0; j<n+2; j++)
-    {
-        //left wall
-        u[0][j] = 0.0;
-        v[0][j] = -v[1][j];
-        //right wall
-        u[n][j] = 0.0;
-        v[n+1][j] = -v[n][j];
-    }
-    for(int i=0; i<n+2; i++)
-    {
-        //top wall (moving with the pace U_wall)
-        u[i][n+1] = -u[i][n] + 2*U_wall;
-        v[i][n]   = 0.0;
-        //bottom wall
-        u[i][0] = -u[i][1];
-        v[i][0] = 0.0;
-    }
-}
-
-
-void pressureIt(double u[n+2][n+2], double v[n+2][n+2], double p[n+2][n+2], int iflag, double epsi, double beta, double h, double dt) {             // Piter, Pressure iterations
+void pressureIt(double u[n+2][n+2], double v[n+2][n+2], double p[n+2][n+2], int *iflag, double epsi, double beta, double h, double dt, int option, int boxHeigth, int boxStart, int boxLength) {
     for (int j=1; j<n+1; j++)
     {
         for(int i=1; i<n+1; i++)
         {
-            double div=(u[i][j]-u[i-1][j])/h+(v[i][j]-v[i][j-1])/h;     // continuity equation discretized with backwards differences
-            if (fabs(div)>=epsi) {
-                iflag=1;
-            }
-            double delp = -beta*div;
-            p[i][j]  =p[i][j]  +delp;
+            if(option != 2  ||  j <= (n - boxHeigth)/2 || j > (n  + boxHeigth)/2 || i <= boxStart || i > boxStart + boxLength )
+            {
+                // continuity equation discretized with backwards differences
+                double div = (u[i][j]-u[i-1][j])/h + (v[i][j]-v[i][j-1])/h; 
+                if (fabs(div)>=epsi) {
+                    *iflag=1;
+                }
+                double delp = -beta*div;
+                
+                p[i][j]  =p[i][j]  +delp;
 
-            u[i][j]  =u[i][j]  +delp*dt/h;
-            u[i-1][j]=u[i-1][j]-delp*dt/h;
-            v[i][j]  =v[i][j]  +delp*dt/h;
-            v[i][j-1]=v[i][j-1]-delp*dt/h;
+                u[i][j]  =u[i][j]  +delp*dt/h;
+                u[i-1][j]=u[i-1][j]-delp*dt/h;
+                v[i][j]  =v[i][j]  +delp*dt/h;
+                v[i][j-1]=v[i][j-1]-delp*dt/h;
+            }
         }
     }
 }

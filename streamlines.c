@@ -13,13 +13,14 @@ void streamlines(double u[n+2][n+2], double v[n+2][n+2], double psi[n+1][n+1], d
             psi[i][j] = h*u[i][j] + psi[i][j-1];
         }
     }
-    // endre siste her til å rotere matrisen
+    
     for (int i=0; i<n+1; i++)
     {
         for(int j=1; j<n+1; j++)
         {
-            psi[j][i] = psi[i][j];
+            psi[i][j] = - psi[i][j];
         }
     }
+    
 }
 
